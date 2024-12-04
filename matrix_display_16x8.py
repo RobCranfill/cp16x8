@@ -23,14 +23,23 @@ class led_matrix_16x8:
     DISPLAY_WIDTH  = 16
 
 
-    def __init__(self, i2c, display_string, delay, brightness=1.0):
+    def __init__(self, i2c, display_string, delay, start=True, brightness=1.0):
         '''Initialize by giving us the I2C bus object, display string, and column delay.'''
 
         self.matrix_ = matrix.MatrixBackpack16x8(i2c)
         self.matrix_.brightness = brightness
 
         vr = self.make_V_rasters(display_string)
-        self.display_forever(vr, delay)
+
+        if start:
+            self.display_forever(vr, delay)
+        else:
+            print("start=False; waiting....")
+
+    def show_once(self, str):
+        print(f"show_once: '{str}'")
+        vr = self.make_V_rasters(str)
+        self.display_forever(vr, 0, True) # FIXME: delay
 
 
     # For the string, create the big list of bit values (columns), left to right.
@@ -66,11 +75,12 @@ class led_matrix_16x8:
     # The input data already has the first 2 chars duplicated at the end, for ease of rotation.
     # Uses global displayDelay_ so we can change that after creating the thread.
     #
-    def display_forever(self, vrs, delay):
+    def display_forever(self, vrs, delay, just_once):
 
         # Initially, render leftmost DISPLAY_WIDTH columns...
         #
         self.display_initial_rasters(vrs[0:self.DISPLAY_WIDTH])
+        time.sleep(delay)
 
         # ...Now just left-shift the exiting pixels, and paint the rightmost column, forever.
         c = self.DISPLAY_WIDTH
@@ -80,6 +90,9 @@ class led_matrix_16x8:
 
             c += 1
             if c >= len(vrs):
+                if just_once:
+                    print("RETURING AFTER JUST ONCE!")
+                    return
                 c = self.DISPLAY_WIDTH
 
             for y in range(self.DISPLAY_HEIGHT):
@@ -110,3 +123,17 @@ class led_matrix_16x8:
 def byte_list_for_char(char):
     bits = led8x8Font.FontData[char]
     return bits
+
+def test():
+    i2c = board.STEMMA_I2C()
+    md = led_matrix_16x8(i2c, "Testing 1, 2, 3! ", 0.01, brightness=0.2)
+
+def test_2():
+    i2c = board.STEMMA_I2C()
+
+    md = led_matrix_16x8(i2c, "Testing 3, 2, 1!", 0.01, start=False, brightness=0.2)
+    while True:
+        for i in range(10):
+            md.show_once(f"  Test #{i}...")
+            time.sleep(1)
+

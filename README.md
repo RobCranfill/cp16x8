@@ -9,10 +9,10 @@ Scrolls a message, supporting full ASCII char set, on an Adafruit 16x8 LED "back
   * A CircuitPython board to run it on - I used a spiffy new Adafruit Feather RP2035 but a much 'smaller' MCU will work fine (speed?)
   * I used CircuitPython 9.2.0, the latest at this time.
   * Adafruit/CircuitPython libraries:
-    * adafruit_ht16k33
-    * other libs as required by the above; adafruit_bus_device?
+    * adafruit_ht16k33 (version 4.6.10 used)
+    * other libs as required by the above; adafruit_bus_device (version 5.2.10 used)
 
 # TODO
   * NEED TO BE ABLE TO UPDATE THE TEXT !!!!!
-  
+
 
