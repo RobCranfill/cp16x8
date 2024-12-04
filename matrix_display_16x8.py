@@ -23,31 +23,30 @@ class led_matrix_16x8:
     DISPLAY_WIDTH  = 16
 
 
-    def __init__(self, i2c, display_string, delay):
+    def __init__(self, i2c, display_string, delay, brightness=1.0):
         '''Initialize by giving us the I2C bus object, display string, and column delay.'''
 
-        self.i2c_ = i2c
         self.matrix_ = matrix.MatrixBackpack16x8(i2c)
-        
-        vr = self.makeVRasters(display_string)
+        self.matrix_.brightness = brightness
+
+        vr = self.make_V_rasters(display_string)
         self.display_forever(vr, delay)
 
 
     # For the string, create the big list of bit values (columns), left to right.
     #
-    def makeVRasters(self, string):
-
-        bits = []
+    def make_V_rasters(self, string):
 
         if len(string) == 0: # is there a better way to handle this null-input case?
-            string = " "
-        if len(string) == 1: # is there a better way to handle this null-input case?
-            string += " "
+            string = "(no input given!)"
 
-        string += string[0] # duplicate the first char onto the end of the data for easier scrolling.
+        # duplicate the first 2 chars onto the end of the data for easier scrolling.
+        string += string[0]
+
         string += string[1] # duplicate the 2nd char onto the end of the data for easier scrolling.
         print(f" Input string now '{string}'")
 
+        vrasters = []
         for char in string:
             # bl is the list of *horizontal* rasters for the char
             bl = byte_list_for_char(char)
@@ -57,10 +56,10 @@ class led_matrix_16x8:
                     bitVal = ((1 << bitIndex) & bl[hRasterIndex])
                     if bitVal > 0:
                         thisVR += (1 << (self.DISPLAY_HEIGHT-hRasterIndex-1))
-                bits.append(thisVR)
+                vrasters.append(thisVR)
 
-        # print(f"vraster (len {len(bits)}): {bits}")
-        return bits
+        # print(f"vraster (len {len(vrasters)}): {vrasters}")
+        return vrasters
 
 
     # Rotate the list of vertical rasters thru the display, forever.
