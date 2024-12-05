@@ -77,23 +77,22 @@ class led_matrix_16x8:
     #
     def display_forever(self, vrs, delay, just_once):
 
-        # Initially, render leftmost DISPLAY_WIDTH columns...
+        # Initially, render leftmost DISPLAY_WIDTH columns.
         #
         self.display_initial_rasters(vrs[0:self.DISPLAY_WIDTH])
         time.sleep(delay)
 
-        # ...Now just left-shift the exiting pixels, and paint the rightmost column, forever.
+        # Now just left-shift the existing pixels, and paint the new rightmost column, forever.
         c = self.DISPLAY_WIDTH
         while True:
-
-            self.matrix_.shift(-1, 0)
-
             c += 1
             if c >= len(vrs):
                 if just_once:
-                    print("RETURING AFTER JUST ONCE!")
+                    print("Returning after display just once")
                     return
                 c = self.DISPLAY_WIDTH
+
+            self.matrix_.shift(-1, 0)
 
             for y in range(self.DISPLAY_HEIGHT):
                 self.matrix_[self.DISPLAY_WIDTH-1, y] = vrs[c] & (1<<(self.DISPLAY_HEIGHT-y-1))
@@ -102,11 +101,8 @@ class led_matrix_16x8:
 
 
     # Display the given raster lines - full display width.
-    # LSB of data is at top.
     #
     def display_initial_rasters(self, rasters):
-
-        print(f"Displaying {rasters}...")
         
         for y in range(self.DISPLAY_HEIGHT):
 
@@ -131,7 +127,11 @@ def test():
 def test_2():
     i2c = board.STEMMA_I2C()
 
-    md = led_matrix_16x8(i2c, "Testing 3, 2, 1!", 0.01, start=False, brightness=0.2)
+    md = led_matrix_16x8(i2c, "(doesn't matter)", 0, start=False, brightness=0.2)
+
+    md.show_once(f"") # FIXME! SHOWS GARBAGE
+    time.sleep(1)
+
     while True:
         for i in range(10):
             md.show_once(f"  Test #{i}...")
